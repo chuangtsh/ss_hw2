@@ -1,0 +1,28 @@
+# Cocos Creator generated files
+Mario/library/
+Mario/temp/
+Mario/local/
+Mario/build/
+
+# npm
+node_modules/
+npm-debug.log
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Debugger files
+*.sln
+*.pidb
+*.suo
+
+# OS generated files
+.DS_Store
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
