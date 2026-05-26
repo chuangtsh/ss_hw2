@@ -4,11 +4,12 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        scoreLabel: { default: null, type: cc.Label },
-        coinsLabel: { default: null, type: cc.Label },
-        worldLabel:  { default: null, type: cc.Label },
-        timerLabel: { default: null, type: cc.Label },
-        lifeIcons:  { default: [], type: [cc.Node] },
+        scoreLabel:     { default: null, type: cc.Label },
+        coinsLabel:     { default: null, type: cc.Label },
+        worldLabel:     { default: null, type: cc.Label },
+        timerLabel:     { default: null, type: cc.Label },
+        lifeCountLabel: { default: null, type: cc.Label },
+        lifeIcons:      { default: [], type: [cc.Node] },
     },
 
     // start() runs after ALL nodes' onLoad — guarantees GameManager.instance exists
@@ -24,14 +25,14 @@ cc.Class({
         gm.node.on('time-update',  this._onTime,  this);
         this._refresh(gm);
         gm.startTimer();
-        cc.log('[HUD] initialized. Score:', gm.score, 'Lives:', gm.lives, 'Time:', gm.timeLeft);
     },
 
     _refresh: function (gm) {
-        if (this.scoreLabel) this.scoreLabel.string = this._padScore(gm.score);
-        if (this.coinsLabel) this.coinsLabel.string = 'x' + this._pad2(gm.coins);
-        if (this.worldLabel) this.worldLabel.string = gm.world + '-' + gm.level;
-        if (this.timerLabel) this.timerLabel.string = this._pad3(gm.timeLeft);
+        if (this.scoreLabel)     this.scoreLabel.string     = this._padScore(gm.score);
+        if (this.coinsLabel)     this.coinsLabel.string     = this._pad2(gm.coins);
+        if (this.worldLabel)     this.worldLabel.string     = 'WORLD ' + gm.world;
+        if (this.timerLabel)     this.timerLabel.string     = this._pad3(gm.timeLeft);
+        if (this.lifeCountLabel) this.lifeCountLabel.string = String(gm.lives);
         this._refreshLives(gm.lives);
     },
 
@@ -39,9 +40,12 @@ cc.Class({
         if (this.scoreLabel) this.scoreLabel.string = this._padScore(s);
     },
     _onCoins: function (c) {
-        if (this.coinsLabel) this.coinsLabel.string = 'x' + this._pad2(c);
+        if (this.coinsLabel) this.coinsLabel.string = this._pad2(c);
     },
-    _onLives: function (l) { this._refreshLives(l); },
+    _onLives: function (l) {
+        this._refreshLives(l);
+        if (this.lifeCountLabel) this.lifeCountLabel.string = String(l);
+    },
     _onTime:  function (t) {
         if (this.timerLabel) this.timerLabel.string = this._pad3(t);
         if (this.timerLabel) {

@@ -19,13 +19,20 @@ cc.Class({
         var rb = this.getComponent(cc.RigidBody);
         if (rb) rb.enabled = false;
 
-        var anim = this.getComponent(cc.Animation);
         var self = this;
-        if (anim) {
+        var anim = this.getComponent(cc.Animation);
+        var hasDieClip = anim && anim.getClips().some(function (c) { return c && c.name === 'die'; });
+
+        if (hasDieClip) {
             anim.play('die');
             anim.once('finished', function () { self.node.destroy(); });
         } else {
-            setTimeout(function () { self.node.destroy(); }, 400);
+            // No die clip yet — squish flat then destroy
+            cc.tween(this.node)
+                .to(0.08, { scaleY: 0.15 })
+                .delay(0.25)
+                .call(function () { self.node.destroy(); })
+                .start();
         }
     },
 });

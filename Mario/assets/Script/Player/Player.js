@@ -25,6 +25,8 @@ cc.Class({
         this._facingRight  = true;
         this._fireCD       = 0;
         this._keys         = {};
+        this._camera       = cc.find('Canvas/Main Camera');
+        this._hud          = cc.find('Canvas/HUD');
 
         // ── Diagnostics: confirm components were found ────────────
         cc.log('[Player] RigidBody found:',  !!this._rb);
@@ -62,6 +64,7 @@ cc.Class({
         this._handleFire(dt);
         this._updateAnimation();
         this._checkFallDeath();
+        this._followCamera();
     },
 
     // ── Collision ─────────────────────────────────────────────────
@@ -76,11 +79,14 @@ cc.Class({
         if (otherGroup === 'enemy') {
             if (!this._rb) return;
             var vel = this._rb.linearVelocity;
+            cc.log('[Player] enemy contact | vel.y:', vel.y, '| node:', otherCol.node.name);
             if (vel.y <= 0) {
-                var enemy = otherCol.node.getComponent('EnemyBase') ||
-                            otherCol.node.getComponent('Goomba')    ||
-                            otherCol.node.getComponent('Turtle');
-                if (enemy) { enemy.onStomp(); this._bounce(); }
+                // Use class reference so instanceof covers Goomba + Turtle via EnemyBase.
+                // Flower does not extend EnemyBase so check it separately.
+                var enemy = otherCol.node.getComponent(EnemyBase) ||
+                            otherCol.node.getComponent('Flower');
+                cc.log('[Player] stomp | enemy found:', !!enemy);
+                if (enemy && enemy.onStomp) { enemy.onStomp(); this._bounce(); }
                 var am = this._getAM();
                 if (am) am.playSFX(am.sfxStomp);
             } else {
@@ -94,8 +100,12 @@ cc.Class({
         }
 
         if (otherGroup === 'trigger') {
+            cc.log('[Player] trigger contact | node:', otherCol.node.name);
             var coin = otherCol.node.getComponent('Coin');
             if (coin) coin.collect();
+
+            var flag = otherCol.node.getComponent('Flag');
+            if (flag) flag.activate(this.node);
         }
     },
 
@@ -223,6 +233,19 @@ cc.Class({
         if (exists) {
             this._anim.play(clipName);
         }
+    },
+
+    _followCamera: function () {
+        if (!this._camera) return;
+        var halfBg  = 1500;  // half of background width (3000)
+        var halfView = 480;  // half of canvas width (960)
+        var maxOff  = halfBg - halfView;  // 1020
+        // Mario's local x in World equals its canvas x (World is at canvas origin).
+        // Setting camera.x to the same value centers the viewport on Mario.
+        var targetX = cc.misc.clampf(this.node.x, -maxOff, maxOff);
+        this._camera.x = targetX;
+        // Keep HUD locked to screen by moving it in sync with the camera.
+        if (this._hud) this._hud.x = targetX;
     },
 
     _getAM: function () {

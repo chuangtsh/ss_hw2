@@ -7,13 +7,29 @@ cc.Class({
     },
 
     onLoad: function () {
-        // Reset persistent game state so a fresh run starts clean
+        // Guard: if Firebase is loaded and user is not authenticated,
+        // show the auth overlay instead of allowing menu use.
+        if (typeof firebase !== 'undefined') {
+            var user = firebase.auth().currentUser;
+            if (!user) {
+                var overlay = document.getElementById('auth-overlay');
+                if (overlay) overlay.classList.remove('hidden');
+                return;
+            }
+        }
+
         var gm = GameManager.instance;
         if (gm) gm.resetAll();
     },
 
     startGame: function () {
-        // Play button press SFX if AudioManager is present
+        // Require authentication before entering game.
+        if (typeof firebase !== 'undefined' && !firebase.auth().currentUser) {
+            var overlay = document.getElementById('auth-overlay');
+            if (overlay) overlay.classList.remove('hidden');
+            return;
+        }
+
         var gm = cc.find('GameManager');
         if (gm) {
             var am = gm.getComponent('AudioManager');

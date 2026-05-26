@@ -22,13 +22,12 @@ cc.Class({
         }
     },
 
-    // Also handle via physics contact directly
     onBeginContact: function (contact, selfCol, otherCol) {
         if (this._used) return;
         if (otherCol.node.group !== 'player') return;
-        var normal = contact.getWorldManifold().normal;
-        // Normal pointing downward means player hit from below
-        if (normal.y < -0.5) {
+        // Player moving upward means they jumped into the block bottom.
+        var rb = otherCol.node.getComponent(cc.RigidBody);
+        if (rb && rb.linearVelocity.y > 0) {
             this._activate();
         }
     },

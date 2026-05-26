@@ -54,14 +54,19 @@ var EnemyBase = cc.Class({
     },
 
     _playDeath: function () {
-        // Subclasses override for specific death animations
         var self = this;
         var anim = this.getComponent(cc.Animation);
-        if (anim) {
+        var hasDieClip = anim && anim.getClips().some(function (c) { return c && c.name === 'die'; });
+
+        if (hasDieClip) {
             anim.play('die');
             anim.once('finished', function () { self.node.destroy(); });
         } else {
-            this.node.destroy();
+            cc.tween(this.node)
+                .to(0.08, { scaleY: 0.15 })
+                .delay(0.25)
+                .call(function () { self.node.destroy(); })
+                .start();
         }
     },
 });
