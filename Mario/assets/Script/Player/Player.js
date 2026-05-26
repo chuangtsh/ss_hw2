@@ -25,6 +25,7 @@ cc.Class({
         this._facingRight  = true;
         this._fireCD       = 0;
         this._keys         = {};
+        this._invincible   = false;
         this._camera       = cc.find('Canvas/Main Camera');
         this._hud          = cc.find('Canvas/HUD');
 
@@ -80,7 +81,7 @@ cc.Class({
             if (!this._rb) return;
             var vel = this._rb.linearVelocity;
             cc.log('[Player] enemy contact | vel.y:', vel.y, '| node:', otherCol.node.name);
-            if (vel.y <= 0) {
+            if (vel.y < -10) {
                 // Use class reference so instanceof covers Goomba + Turtle via EnemyBase.
                 // Flower does not extend EnemyBase so check it separately.
                 var enemy = otherCol.node.getComponent(EnemyBase) ||
@@ -180,20 +181,23 @@ cc.Class({
     },
 
     _getHurt: function () {
+        if (this._invincible) return;
         var am = this._getAM();
-        if (this._formState === 'small') {
-            if (am) am.playSFX(am.sfxPowerDown);
-            var gm = GameManager.instance;
-            if (gm) gm.triggerGameOver();
-        } else {
+        if (am) am.playSFX(am.sfxPowerDown);
+        if (this._formState !== 'small') {
             this._formState = 'small';
-            if (am) am.playSFX(am.sfxPowerDown);
+        }
+        var gm = GameManager.instance;
+        if (gm) gm.loseLife();
+        // Only flash if still alive (loseLife keeps STATE_PLAYING when lives remain)
+        if (!gm || gm.getState() === gm.STATE_PLAYING) {
             this._flashInvincible();
         }
     },
 
     _flashInvincible: function () {
         if (!this._sprite) return;
+        this._invincible = true;
         var count = 0;
         var self  = this;
         var timer = setInterval(function () {
@@ -201,6 +205,7 @@ cc.Class({
             if (++count >= 14) {
                 clearInterval(timer);
                 self._sprite.enabled = true;
+                self._invincible = false;
             }
         }, 100);
     },

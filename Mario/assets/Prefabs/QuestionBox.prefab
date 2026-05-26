@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Goomba",
+    "_name": "QuestionBox",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -30,10 +30,13 @@
       },
       {
         "__id__": 5
+      },
+      {
+        "__id__": 6
       }
     ],
     "_prefab": {
-      "__id__": 6
+      "__id__": 7
     },
     "_opacity": 255,
     "_color": {
@@ -45,8 +48,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 40,
-      "height": 40
+      "width": 64,
+      "height": 64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,8 +60,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
-        107.663,
+        151.446,
+        210.665,
         0,
         0,
         0,
@@ -78,8 +81,8 @@
     "_skewX": 0,
     "_skewY": 0,
     "_is3DNode": false,
-    "_groupIndex": 2,
-    "groupIndex": 2,
+    "_groupIndex": 3,
+    "groupIndex": 3,
     "_id": ""
   },
   {
@@ -98,7 +101,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "9091586d-1970-41dd-a95e-1949e5636d00"
+      "__uuid__": "66b9c6d4-0680-4157-8e0c-f37ec92551ae"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -112,8 +115,27 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": {
-      "__uuid__": "c8bca7df-413f-41a4-ac70-f3f915bd2bcf"
+      "__uuid__": "83b5cd56-d5e0-4ae9-8efa-6081838537a3"
     },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Animation",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_defaultClip": {
+      "__uuid__": "3d3550f5-9737-432a-ade3-50afe29ccf74"
+    },
+    "_clips": [
+      {
+        "__uuid__": "3d3550f5-9737-432a-ade3-50afe29ccf74"
+      }
+    ],
+    "playOnLoad": true,
     "_id": ""
   },
   {
@@ -124,7 +146,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 2,
+    "_type": 0,
     "_allowSleep": true,
     "_gravityScale": 1,
     "_linearDamping": 0,
@@ -135,8 +157,8 @@
       "y": 0
     },
     "_angularVelocity": 0,
-    "_fixedRotation": true,
-    "enabledContactListener": false,
+    "_fixedRotation": false,
+    "enabledContactListener": true,
     "bullet": false,
     "awakeOnLoad": true,
     "_id": ""
@@ -162,23 +184,25 @@
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 32,
-      "height": 32
+      "width": 48,
+      "height": 48
     },
     "_id": ""
   },
   {
-    "__type__": "88f80zCtjRDG73DttOX62UK",
+    "__type__": "89660Fa56RF8oqsYAAPwrnO",
     "_name": "",
     "_objFlags": 0,
     "node": {
       "__id__": 1
     },
     "_enabled": true,
-    "moveSpeed": 60,
-    "scoreValue": 100,
-    "_dead": false,
-    "_movingRight": false,
+    "contentType": "coin",
+    "coinPrefab": {
+      "__uuid__": "e7883fd9-6405-4f29-b13f-4a1bc1b2da1d"
+    },
+    "powerUpPrefab": null,
+    "_used": false,
     "_id": ""
   },
   {

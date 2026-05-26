@@ -25,9 +25,11 @@ cc.Class({
     onBeginContact: function (contact, selfCol, otherCol) {
         if (this._used) return;
         if (otherCol.node.group !== 'player') return;
-        // Player moving upward means they jumped into the block bottom.
         var rb = otherCol.node.getComponent(cc.RigidBody);
-        if (rb && rb.linearVelocity.y > 0) {
+        var velY = rb ? rb.linearVelocity.y : 0;
+        cc.log('[QuestionBlock] contact | vel.y:', velY, '| player below:', otherCol.node.y < this.node.y);
+        // Activate when player is below the block and moving upward.
+        if (otherCol.node.y < this.node.y && velY > 0) {
             this._activate();
         }
     },
@@ -54,23 +56,47 @@ cc.Class({
     },
 
     _spawnContent: function () {
-        var prefab = (this.contentType === 'coin') ? this.coinPrefab : this.powerUpPrefab;
-        if (!prefab) return;
-
-        var item = cc.instantiate(prefab);
-        item.setPosition(this.node.x, this.node.y + this.node.height);
-        this.node.parent.addChild(item);
-
-        if (this.contentType !== 'coin') {
-            var pu = item.getComponent('PowerUp');
+        if (this.contentType === 'coin') {
+            var prefab = this.coinPrefab;
+            if (prefab) {
+                // Spawn real Coin prefab
+                var item = cc.instantiate(prefab);
+                item.setPosition(this.node.x, this.node.y + this.node.height);
+                this.node.parent.addChild(item);
+            } else {
+                // No prefab linked — still give coin + show floating popup
+                var gm = GameManager.instance;
+                if (gm) gm.addCoin();
+                this._popupCoin();
+            }
+        } else {
+            var puPrefab = this.powerUpPrefab;
+            if (!puPrefab) { cc.warn('[QuestionBlock] powerUpPrefab not set'); return; }
+            var puItem = cc.instantiate(puPrefab);
+            puItem.setPosition(this.node.x, this.node.y + this.node.height);
+            this.node.parent.addChild(puItem);
+            var pu = puItem.getComponent('PowerUp');
             if (pu) {
                 pu.type = this.contentType;
-                // Slide up then start moving
-                cc.tween(item)
+                cc.tween(puItem)
                     .to(0.3, { y: this.node.y + this.node.height + 32 })
                     .call(function () { if (pu) pu.startMoving(); })
                     .start();
             }
         }
+    },
+
+    _popupCoin: function () {
+        var popup = new cc.Node('coin_popup');
+        var lc = popup.addComponent(cc.Label);
+        lc.string = '+1 Coin';
+        lc.fontSize = 22;
+        popup.color = cc.Color.YELLOW;
+        popup.setPosition(this.node.x, this.node.y + this.node.height + 10);
+        this.node.parent.addChild(popup);
+        cc.tween(popup)
+            .to(0.7, { y: this.node.y + this.node.height + 60, opacity: 0 })
+            .call(function () { popup.destroy(); })
+            .start();
     },
 });

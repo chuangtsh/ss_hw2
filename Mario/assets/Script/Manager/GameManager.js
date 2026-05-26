@@ -78,11 +78,22 @@ var GameManager = cc.Class({
         this.node.emit('game-resumed');
     },
 
+    // Lose one life; if lives remain, keep playing. If 0, go to game over.
+    loseLife: function () {
+        if (this._state !== this.STATE_PLAYING) return;
+        this.lives -= 1;
+        this.node.emit('lives-update', this.lives);
+        if (this.lives <= 0) {
+            this.triggerGameOver();
+        }
+        // Else: state stays STATE_PLAYING so enemies keep moving;
+        // Player handles the invincible flash.
+    },
+
     triggerGameOver: function () {
         if (this._state === this.STATE_GAMEOVER) return;
         this._stopTimer();
         this._state = this.STATE_GAMEOVER;
-        this.lives -= 1;
         this.node.emit('lives-update', this.lives);
         var am = cc.find('GameManager').getComponent('AudioManager');
         if (am) am.playBGM(am.sfxGameOver);
