@@ -27,10 +27,11 @@ cc.Class({
 
     nextLevel: function () {
         var gm = GameManager.instance;
-        if (gm) {
-            gm.level += 1;
-            gm.resetForNewLevel();
-        }
+        var state = gm ? gm.getState() : null;
+        // Don't clobber the GameOver scene, and don't double-fire with GM fallback.
+        if (state !== gm.STATE_CLEAR) return;
+        gm.level += 1;
+        gm.resetForNewLevel();
         // For now always reload same scene; extend with multi-level loading as needed
         cc.director.loadScene('Game');
     },

@@ -52,7 +52,8 @@ cc.Class({
 
     update: function (dt) {
         var gm = GameManager.instance;
-        if (gm && gm.getState() === gm.STATE_PAUSED) return;
+        var state = gm ? gm.getState() : null;
+        if (state && state !== gm.STATE_PLAYING) return;
 
         // Guard: nothing works without a RigidBody
         if (!this._rb) {
@@ -106,6 +107,7 @@ cc.Class({
             if (coin) coin.collect();
 
             var flag = otherCol.node.getComponent('Flag');
+            cc.log('[Player] flag component found:', !!flag);
             if (flag) flag.activate(this.node);
         }
     },
@@ -213,7 +215,7 @@ cc.Class({
     _checkFallDeath: function () {
         if (this.node.y < -400) {
             var gm = GameManager.instance;
-            if (gm) gm.triggerGameOver();
+            if (gm && gm.getState() === gm.STATE_PLAYING) gm.triggerGameOver();
         }
     },
 

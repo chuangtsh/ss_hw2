@@ -95,6 +95,14 @@ var GameManager = cc.Class({
         this._stopTimer();
         this._state = this.STATE_GAMEOVER;
         this.node.emit('lives-update', this.lives);
+        this.node.emit('game-over', {
+            score:    this.score,
+            coins:    this.coins,
+            lives:    this.lives,
+            world:    this.world,
+            level:    this.level,
+            timeLeft: this.timeLeft,
+        });
         var am = cc.find('GameManager').getComponent('AudioManager');
         if (am) am.playBGM(am.sfxGameOver);
         var self = this;
@@ -110,6 +118,10 @@ var GameManager = cc.Class({
         var bonus = this.timeLeft * 50;
         this.addScore(bonus);
         this.node.emit('level-complete', bonus);
+        var self = this;
+        setTimeout(function () {
+            cc.director.loadScene('GameOver');
+        }, 2000);
     },
 
     resetForNewLevel: function () {
