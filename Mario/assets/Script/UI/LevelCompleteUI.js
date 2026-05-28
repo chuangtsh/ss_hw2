@@ -18,7 +18,7 @@ cc.Class({
     _onLevelComplete: function (bonus) {
         if (this.panel) this.panel.active = true;
         if (this.bonusLabel) this.bonusLabel.string = 'Time Bonus: +' + bonus;
-        var am = cc.find('GameManager') && cc.find('GameManager').getComponent('AudioManager');
+        var am = GameManager.instance && GameManager.instance.node.getComponent('AudioManager');
         if (am) am.playSFX(am.sfxLevelClear);
         // Auto-advance after 4 seconds if player doesn't press next
         var self = this;

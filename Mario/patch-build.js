@@ -45,6 +45,16 @@ const headInject = `
   <\/script>
 
   <style>
+    /* ── Full-viewport canvas ────────────────────────────────────── */
+    html, body {
+      width: 100%; height: 100%; overflow: hidden; background: #000;
+    }
+    #GameDiv {
+      width: 100% !important; height: 100% !important;
+      margin: 0 !important; border: none !important;
+      border-radius: 0 !important; box-shadow: none !important;
+    }
+
     .hidden { display: none !important; }
 
     /* ── Auth overlay ────────────────────────────────────────────── */
@@ -107,19 +117,60 @@ const headInject = `
     #btn-logout { font-family:'Press Start 2P',monospace; font-size:7px; padding:4px 8px; background:#b81808; color:#fff; border:2px solid #700; border-radius:2px; cursor:pointer; }
     #btn-logout:hover { background:#901206; }
 
+    /* ── Level Select overlay ────────────────────────────────────── */
+    #level-select-overlay {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      z-index:9990; display:none; flex-direction:column;
+      align-items:center; justify-content:center;
+      background:linear-gradient(180deg,#5dc8f5 0%,#8ed8f8 50%,#b5eaff 100%);
+      font-family:'Press Start 2P','Courier New',monospace; overflow:hidden;
+      transition:opacity .4s ease;
+    }
+    #level-select-overlay.visible { display:flex; }
+    #level-select-overlay.fade-out { opacity:0; pointer-events:none; }
+    #level-select-overlay::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:72px;
+      background:repeating-linear-gradient(90deg,#d4b896 0 40px,#c8a878 40px 80px);
+      border-top:6px solid #8b5e20;
+    }
+    .ls-card { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:32px; }
+    .ls-title { font-size:clamp(14px,2.2vw,22px); color:#f8d020; letter-spacing:4px;
+      text-shadow:3px 3px 0 #907000,-1px -1px 0 #604800,1px -1px 0 #604800,-1px 1px 0 #604800; }
+    .ls-grid { display:flex; gap:24px; flex-wrap:wrap; justify-content:center; }
+    .ls-btn {
+      font-family:'Press Start 2P','Courier New',monospace;
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      width:clamp(120px,18vw,160px); padding:24px 16px; background:#2898d8;
+      border:none; border-radius:6px; cursor:pointer; color:#fff;
+      box-shadow:inset 2px 2px 0 rgba(255,255,255,.4),inset -2px -2px 0 rgba(0,0,0,.25),4px 4px 0 rgba(0,0,0,.30);
+      transition:transform .08s, box-shadow .08s; outline:none;
+    }
+    .ls-btn:hover { background:#1a78b8; }
+    .ls-btn:active { transform:translate(3px,4px); box-shadow:inset 2px 2px 0 rgba(255,255,255,.4),inset -2px -2px 0 rgba(0,0,0,.25),1px 1px 0 rgba(0,0,0,.30); }
+    .ls-num { font-size:clamp(28px,4vw,40px); color:#f8d020; text-shadow:2px 2px 0 #907000; }
+    .ls-name { font-size:clamp(8px,1.1vw,11px); letter-spacing:1px; }
+    .ls-bottom-row { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+
     /* ── Leaderboard overlay ─────────────────────────────────────── */
-    #leaderboard-overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:9000; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.88); font-family:'Press Start 2P','Courier New',monospace; }
+    #leaderboard-overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:9995; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.82); font-family:'Press Start 2P','Courier New',monospace; }
     #leaderboard-overlay.visible { display:flex; }
-    .lb-card { display:flex; flex-direction:column; align-items:center; gap:20px; background:#1a1a2e; border:4px solid #f8d020; border-radius:6px; padding:30px 24px; min-width:min(380px,90vw); max-width:90vw; }
-    .lb-title { font-size:clamp(12px,2vw,16px); color:#f8d020; letter-spacing:3px; text-shadow:2px 2px 0 #000; }
-    .lb-list { width:100%; display:flex; flex-direction:column; gap:6px; min-height:60px; }
-    .lb-row { display:flex; align-items:center; gap:10px; font-size:clamp(7px,.9vw,9px); color:#ccc; padding:6px 8px; border-radius:3px; background:rgba(255,255,255,.05); }
-    .lb-row.lb-me { background:rgba(248,208,32,.18); color:#f8d020; }
-    .lb-rank { width:22px; text-align:right; color:#555; flex-shrink:0; }
+    .lb-card { display:flex; flex-direction:column; align-items:center; gap:14px; background:#1a1a2e; border:4px solid #f8d020; border-radius:6px; padding:28px 28px 22px; width:min(680px,94vw); box-sizing:border-box; }
+    .lb-title { font-size:clamp(12px,1.8vw,15px); color:#f8d020; letter-spacing:3px; text-shadow:2px 2px 0 #000; }
+    .lb-list { width:100%; display:flex; flex-direction:column; gap:4px; }
+    .lb-header { display:grid; grid-template-columns:28px 1fr 82px 52px 46px 52px; gap:6px; font-size:clamp(6px,.7vw,8px); color:#555; padding:4px 8px 7px; border-bottom:1px solid #333; letter-spacing:1px; }
+    .lb-header span:nth-child(n+3) { text-align:center; }
+    .lb-row { display:grid; grid-template-columns:28px 1fr 82px 52px 46px 52px; gap:6px; align-items:center; font-size:clamp(7px,.85vw,10px); color:#ccc; padding:7px 8px; border-radius:3px; background:rgba(255,255,255,.05); }
+    .lb-row.lb-me { background:rgba(248,208,32,.15); outline:1px solid rgba(248,208,32,.5); }
+    .lb-rank { text-align:right; color:#555; }
     .lb-row.lb-me .lb-rank { color:#f8d020; }
-    .lb-name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .lb-score { color:#50c830; letter-spacing:1px; flex-shrink:0; }
+    .lb-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .lb-row.lb-me .lb-name { color:#f8d020; }
+    .lb-score { color:#50c830; text-align:center; letter-spacing:1px; }
     .lb-row.lb-me .lb-score { color:#f8d020; }
+    .lb-coins { color:#f8d020; text-align:center; }
+    .lb-world { color:#88c8f8; text-align:center; }
+    .lb-time  { color:#f88048; text-align:center; }
+    .lb-row.lb-me .lb-coins,.lb-row.lb-me .lb-world,.lb-row.lb-me .lb-time { color:#f8d020; }
     .lb-empty { font-size:9px; color:#666; text-align:center; padding:20px 0; width:100%; }
   </style>`;
 
@@ -168,6 +219,25 @@ const overlayHTML = `
 <div id="user-bar">
   <span class="ue" id="user-name-display"></span>
   <button id="btn-logout">LOGOUT</button>
+</div>
+
+<div id="level-select-overlay">
+  <div class="ls-card">
+    <div class="ls-title">&#9733; SELECT LEVEL &#9733;</div>
+    <div class="ls-grid">
+      <button class="ls-btn" id="ls-btn-1">
+        <span class="ls-num">1</span>
+        <span class="ls-name">WORLD 1-1</span>
+      </button>
+      <button class="ls-btn" id="ls-btn-2">
+        <span class="ls-num">2</span>
+        <span class="ls-name">WORLD 1-2</span>
+      </button>
+    </div>
+    <div class="ls-bottom-row">
+      <button class="mario-btn grey" id="ls-leaderboard-btn">LEADERBOARD</button>
+    </div>
+  </div>
 </div>
 
 <div id="leaderboard-overlay">
@@ -221,16 +291,21 @@ const authScript = `
     auth.onAuthStateChanged(function(user) {
       if (user) {
         overlay.classList.add('fade-out');
-        setTimeout(function(){ overlay.style.display = 'none'; }, 500);
-        userBar.classList.add('visible');
+        setTimeout(function(){
+          overlay.style.display = 'none';
+          showLevelSelect();
+        }, 500);
         // Fetch username saved in RTDB; fall back to email prefix for old accounts
         db.ref('users/' + user.uid + '/username').once('value').then(function(snap) {
           var uname = snap.val() || user.email.split('@')[0];
           window._currentUser = { uid: user.uid, email: user.email, username: uname };
           if (nameEl) nameEl.textContent = uname;
+          var lsName = document.getElementById('ls-username');
+          if (lsName) lsName.textContent = uname;
         });
       } else {
         window._currentUser = null;
+        hideLevelSelect();
         overlay.style.display = '';
         overlay.classList.remove('fade-out');
         userBar.classList.remove('visible');
@@ -266,6 +341,34 @@ const authScript = `
         'auth/network-request-failed':'Network error.'
       })[c] || 'Something went wrong.';
     }
+
+    // ── Level Select helpers ──────────────────────────────────────
+    function showLevelSelect() {
+      var ls = document.getElementById('level-select-overlay');
+      if (ls) ls.classList.add('visible');
+    }
+    function hideLevelSelect(cb) {
+      var ls = document.getElementById('level-select-overlay');
+      if (!ls || !ls.classList.contains('visible')) { if (cb) cb(); return; }
+      ls.classList.add('fade-out');
+      setTimeout(function() {
+        ls.classList.remove('visible', 'fade-out');
+        if (cb) cb();
+      }, 400);
+    }
+    function launchGame() {
+      hideLevelSelect(function() {
+        if (typeof cc !== 'undefined' && cc.director) {
+          cc.director.loadScene('Game');
+        }
+      });
+    }
+
+    document.getElementById('ls-btn-1').onclick = launchGame;
+    document.getElementById('ls-btn-2').onclick = launchGame;
+    document.getElementById('ls-leaderboard-btn').onclick = function() {
+      if (window.leaderboard) window.leaderboard.show();
+    };
 
     // ── Button handlers ───────────────────────────────────────────
     document.getElementById('btn-show-login').onclick  = function(){ showPanel('login'); };
@@ -342,10 +445,11 @@ const authScript = `
           if (!ex || data.score > ex.score) {
             ref.set({
               username: u.username,
-              score:    data.score || 0,
-              coins:    data.coins || 0,
-              world:    data.world || 1,
-              level:    data.level || 1,
+              score:    data.score    || 0,
+              coins:    data.coins    || 0,
+              world:    data.world    || 1,
+              level:    data.level    || 1,
+              timeLeft: data.timeLeft || 0,
               ts:       Date.now()
             });
           }
@@ -353,8 +457,24 @@ const authScript = `
       });
     },
 
-    // Show leaderboard overlay and fetch top-10
-    show: function() {
+    // Fetch top N entries and deliver them to a callback.
+    fetch: function(limit, callback) {
+      if (typeof callback !== 'function') return;
+      waitForDb(function(db) {
+        db.ref('leaderboard').orderByChild('score').limitToLast(limit || 5).once('value')
+          .then(function(snap) {
+            var entries = [];
+            snap.forEach(function(c) { entries.push({ uid: c.key, d: c.val() }); });
+            entries.sort(function(a, b) { return b.d.score - a.d.score; });
+            callback(entries.map(function(e) {
+              return { username: e.d.username || 'Player', score: e.d.score || 0, uid: e.uid };
+            }));
+          }).catch(function() { callback([]); });
+      });
+    },
+
+    // Show leaderboard overlay. runData = {score,coins,world,level,timeLeft} of current run (optional).
+    show: function(runData) {
       var panel = document.getElementById('leaderboard-overlay');
       if (!panel) return;
       panel.classList.add('visible');
@@ -372,14 +492,27 @@ const authScript = `
               return;
             }
             var me = window._currentUser ? window._currentUser.uid : null;
-            list.innerHTML = entries.map(function(e, i) {
+            var header = '<div class="lb-header">' +
+              '<span></span>' +
+              '<span>NAME</span>' +
+              '<span>SCORE</span>' +
+              '<span>COINS</span>' +
+              '<span>WORLD</span>' +
+              '<span>TIME</span>' +
+              '</div>';
+            var rows = entries.map(function(e, i) {
               var mine = me && e.uid === me;
+              var d    = e.d;
               return '<div class="lb-row' + (mine ? ' lb-me' : '') + '">' +
-                '<span class="lb-rank">' + (i + 1) + '.</span>' +
-                '<span class="lb-name">' + trunc(e.d.username || 'Player', 18) + '</span>' +
-                '<span class="lb-score">' + pad6(e.d.score) + '</span>' +
+                '<span class="lb-rank">'  + (i + 1) + '.</span>' +
+                '<span class="lb-name">'  + trunc(d.username || 'Player', 16) + '</span>' +
+                '<span class="lb-score">' + pad6(d.score) + '</span>' +
+                '<span class="lb-coins">x' + String(d.coins || 0).padStart(2, '0') + '</span>' +
+                '<span class="lb-world">' + (d.world || 1) + '-' + (d.level || 1) + '</span>' +
+                '<span class="lb-time">'  + String(d.timeLeft || 0).padStart(3, '0') + '</span>' +
                 '</div>';
             }).join('');
+            list.innerHTML = header + rows;
           });
       });
     },

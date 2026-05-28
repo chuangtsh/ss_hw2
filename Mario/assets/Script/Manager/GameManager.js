@@ -21,6 +21,7 @@ var GameManager = cc.Class({
 
     statics: {
         instance: null,
+        snapshot: null,   // survives scene unload; read by GameOverScreen when instance is gone
     },
 
     onLoad: function () {
@@ -94,18 +95,11 @@ var GameManager = cc.Class({
         if (this._state === this.STATE_GAMEOVER) return;
         this._stopTimer();
         this._state = this.STATE_GAMEOVER;
+        this._saveSnapshot(false);
         this.node.emit('lives-update', this.lives);
-        this.node.emit('game-over', {
-            score:    this.score,
-            coins:    this.coins,
-            lives:    this.lives,
-            world:    this.world,
-            level:    this.level,
-            timeLeft: this.timeLeft,
-        });
-        var am = cc.find('GameManager').getComponent('AudioManager');
+        this.node.emit('game-over', GameManager.snapshot);
+        var am = this.node.getComponent('AudioManager');
         if (am) am.playBGM(am.sfxGameOver);
-        var self = this;
         setTimeout(function () {
             cc.director.loadScene('GameOver');
         }, 2000);
@@ -117,8 +111,8 @@ var GameManager = cc.Class({
         this._state = this.STATE_CLEAR;
         var bonus = this.timeLeft * 50;
         this.addScore(bonus);
+        this._saveSnapshot(true);
         this.node.emit('level-complete', bonus);
-        var self = this;
         setTimeout(function () {
             cc.director.loadScene('GameOver');
         }, 2000);
@@ -142,6 +136,18 @@ var GameManager = cc.Class({
     getState: function () { return this._state; },
 
     // ── Private ───────────────────────────────────────────────────
+
+    _saveSnapshot: function (won) {
+        GameManager.snapshot = {
+            score:    this.score,
+            coins:    this.coins,
+            lives:    this.lives,
+            world:    this.world,
+            level:    this.level,
+            timeLeft: this.timeLeft,
+            won:      won,
+        };
+    },
 
     _stopTimer: function () {
         if (this._timer) { clearInterval(this._timer); this._timer = null; }

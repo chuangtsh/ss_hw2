@@ -38,8 +38,7 @@ cc.Class({
 
         var targetX = this.node.x + 30;
         var gm = GameManager.instance;
-        var audioNode = cc.find('GameManager');
-        var am = audioNode && audioNode.getComponent('AudioManager');
+        var am = GameManager.instance && GameManager.instance.node.getComponent('AudioManager');
 
         cc.tween(playerNode)
             .to(0.6, { x: targetX })

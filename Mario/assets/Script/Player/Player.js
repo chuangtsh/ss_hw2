@@ -28,6 +28,7 @@ cc.Class({
         this._invincible   = false;
         this._camera       = cc.find('Canvas/Main Camera');
         this._hud          = cc.find('Canvas/HUD');
+        this._spawnPos     = cc.v2(this.node.x, this.node.y);
 
         // ── Diagnostics: confirm components were found ────────────
         cc.log('[Player] RigidBody found:',  !!this._rb);
@@ -215,8 +216,22 @@ cc.Class({
     _checkFallDeath: function () {
         if (this.node.y < -400) {
             var gm = GameManager.instance;
-            if (gm && gm.getState() === gm.STATE_PLAYING) gm.triggerGameOver();
+            if (!gm || gm.getState() !== gm.STATE_PLAYING) return;
+            if (this._invincible) return;
+            gm.loseLife();
+            // If lives remain, respawn at starting position.
+            if (gm.getState() === gm.STATE_PLAYING) this._respawn();
         }
+    },
+
+    _respawn: function () {
+        this.node.setPosition(this._spawnPos.x, this._spawnPos.y);
+        if (this._rb) {
+            this._rb.linearVelocity = cc.v2(0, 0);
+            if (this._rb.type !== cc.RigidBodyType.Dynamic)
+                this._rb.type = cc.RigidBodyType.Dynamic;
+        }
+        this._flashInvincible();
     },
 
     _updateAnimation: function () {
@@ -257,8 +272,7 @@ cc.Class({
 
     _getAM: function () {
         if (this.audioManager) return this.audioManager.getComponent('AudioManager');
-        var gm = cc.find('GameManager');
-        return gm ? gm.getComponent('AudioManager') : null;
+        return GameManager.instance ? GameManager.instance.node.getComponent('AudioManager') : null;
     },
 
     _onKeyDown: function (e) {
