@@ -254,13 +254,21 @@ cc.Class({
         } else {
             state = 'idle';
         }
-        var clipName = (this._formState === 'big' ? 'big_' : '') + state;
 
-        // Only switch when state changes — calling play() every frame restarts from frame 0
+        var prefix = this._formState === 'big' ? 'big_' : '';
+        var clips  = this._anim.getClips();
+
+        // Prefer the prefixed clip; fall back to the base-state clip when the
+        // big_ variant doesn't exist yet — prevents getting stuck on 'jump' after
+        // eating a mushroom because 'big_jump' is missing from the atlas.
+        var clipName = prefix + state;
+        if (prefix && !clips.some(function (c) { return c && c.name === clipName; })) {
+            clipName = state;
+        }
+
+        // Only switch when the resolved clip name actually changes
         if (clipName === this._currentClip) return;
-        var clips = this._anim.getClips();
-        var exists = clips.some(function (c) { return c && c.name === clipName; });
-        if (exists) {
+        if (clips.some(function (c) { return c && c.name === clipName; })) {
             this._currentClip = clipName;
             this._anim.play(clipName);
         }

@@ -1497,7 +1497,7 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": {
-      "__uuid__": "feb7ac17-fc4c-4964-9309-583f988e43b4"
+      "__uuid__": "dc6dc8f8-7a1c-433c-baa3-4ba1e656a893"
     },
     "_id": "a5mote/TZLsJKJFHD0VcmS"
   },
@@ -4329,8 +4329,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        131.286,
-        217.173,
+        709.184,
+        229.248,
         0,
         0,
         0,

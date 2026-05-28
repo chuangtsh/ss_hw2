@@ -111,7 +111,7 @@ const headInject = `
     .mario-loading { display:none; font-size:9px; color:#fff; text-shadow:1px 1px 0 #000; animation:blink .8s step-end infinite; }
     .mario-loading.visible { display:block; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-    #user-bar { position:fixed; top:0; right:0; z-index:8888; display:none; align-items:center; gap:10px; background:rgba(0,0,0,.82); color:#fff; font-family:'Press Start 2P','Courier New',monospace; font-size:8px; padding:7px 13px; border-radius:0 0 0 6px; }
+    #user-bar { position:fixed; top:0; left:50%; transform:translateX(-50%); z-index:10001; display:none; align-items:center; gap:10px; background:rgba(0,0,0,.82); color:#fff; font-family:'Press Start 2P','Courier New',monospace; font-size:8px; padding:7px 18px; border-radius:0 0 6px 6px; }
     #user-bar.visible { display:flex; }
     #user-bar .ue { color:#f8d020; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     #btn-logout { font-family:'Press Start 2P',monospace; font-size:7px; padding:4px 8px; background:#b81808; color:#fff; border:2px solid #700; border-radius:2px; cursor:pointer; }
@@ -150,6 +150,7 @@ const headInject = `
     .ls-num { font-size:clamp(28px,4vw,40px); color:#f8d020; text-shadow:2px 2px 0 #907000; }
     .ls-name { font-size:clamp(8px,1.1vw,11px); letter-spacing:1px; }
     .ls-bottom-row { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+    .ls-user-row { display:flex; align-items:center; gap:14px; font-size:clamp(7px,.9vw,9px); color:#fff; text-shadow:1px 1px 0 #000; }
 
     /* ── Leaderboard overlay ─────────────────────────────────────── */
     #leaderboard-overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:9995; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.82); font-family:'Press Start 2P','Courier New',monospace; }
@@ -236,6 +237,10 @@ const overlayHTML = `
     </div>
     <div class="ls-bottom-row">
       <button class="mario-btn grey" id="ls-leaderboard-btn">LEADERBOARD</button>
+    </div>
+    <div class="ls-user-row">
+      <span id="ls-username"></span>
+      <button class="mario-btn grey" id="ls-logout-btn">LOGOUT</button>
     </div>
   </div>
 </div>
@@ -346,6 +351,9 @@ const authScript = `
     function showLevelSelect() {
       var ls = document.getElementById('level-select-overlay');
       if (ls) ls.classList.add('visible');
+      var u = window._currentUser;
+      var el = document.getElementById('ls-username');
+      if (el) el.textContent = u ? u.username : '';
     }
     function hideLevelSelect(cb) {
       var ls = document.getElementById('level-select-overlay');
@@ -368,6 +376,9 @@ const authScript = `
     document.getElementById('ls-btn-2').onclick = launchGame;
     document.getElementById('ls-leaderboard-btn').onclick = function() {
       if (window.leaderboard) window.leaderboard.show();
+    };
+    document.getElementById('ls-logout-btn').onclick = function() {
+      firebase.auth().signOut();
     };
 
     // ── Button handlers ───────────────────────────────────────────
