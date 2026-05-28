@@ -26,6 +26,7 @@ cc.Class({
         this._fireCD       = 0;
         this._keys         = {};
         this._invincible   = false;
+        this._currentClip  = '';
         this._camera       = cc.find('Canvas/Main Camera');
         this._hud          = cc.find('Canvas/HUD');
         this._spawnPos     = cc.v2(this.node.x, this.node.y);
@@ -125,9 +126,13 @@ cc.Class({
         var am = this._getAM();
         if (type === 'mushroom' && this._formState === 'small') {
             this._formState = 'big';
+            this.node.scaleX = this._facingRight ? 1.5 : -1.5;
+            this.node.scaleY = 1.5;
             if (am) am.playSFX(am.sfxPowerUp);
         } else if (type === 'fireFlower') {
             this._formState = 'fire';
+            this.node.scaleX = this._facingRight ? 1.5 : -1.5;
+            this.node.scaleY = 1.5;
             if (am) am.playSFX(am.sfxPowerUp);
         }
     },
@@ -189,6 +194,8 @@ cc.Class({
         if (am) am.playSFX(am.sfxPowerDown);
         if (this._formState !== 'small') {
             this._formState = 'small';
+            this.node.scaleX = this._facingRight ? 1 : -1;
+            this.node.scaleY = 1;
         }
         var gm = GameManager.instance;
         if (gm) gm.loseLife();
@@ -249,10 +256,12 @@ cc.Class({
         }
         var clipName = (this._formState === 'big' ? 'big_' : '') + state;
 
-        // Guard: only play the clip if it actually exists
+        // Only switch when state changes — calling play() every frame restarts from frame 0
+        if (clipName === this._currentClip) return;
         var clips = this._anim.getClips();
         var exists = clips.some(function (c) { return c && c.name === clipName; });
         if (exists) {
+            this._currentClip = clipName;
             this._anim.play(clipName);
         }
     },

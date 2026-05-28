@@ -25,14 +25,8 @@ cc.Class({
     onBeginContact: function (contact, selfCol, otherCol) {
         if (this._used) return;
         if (otherCol.node.group !== 'player') return;
-
-        // Only trigger when player is jumping upward into the block's bottom face.
-        var rb = otherCol.node.getComponent(cc.RigidBody);
-        if (!rb || rb.linearVelocity.y <= 0) return;
-
-        // Confirm it's a vertical (bottom) hit, not a side hit.
-        var wm = contact.getWorldManifold();
-        if (Math.abs(wm.normal.y) > Math.abs(wm.normal.x)) {
+        // Player center below block center → hit from below
+        if (otherCol.node.y < this.node.y) {
             this._activate();
         }
     },
